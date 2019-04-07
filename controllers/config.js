@@ -49,7 +49,7 @@ class Config {
       // + pass
       // + '@'
       + host
-      + (port ? `:${port}`: port)
+      + (port ? `:${port}` : port)
       + '/'
       + db;
   }

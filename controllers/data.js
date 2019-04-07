@@ -1,9 +1,9 @@
 const MongoClient = require('mongodb').MongoClient;
-const Config = require('./config');
-const Async = require('async');
-const log = require('debug')('app:controllers:data');
+const Config      = require('./config');
+const Async       = require('async');
+const log         = require('debug')('app:controllers:data');
 
-const RETRIES = 3;
+const RETRIES       = 3;
 const RETRY_TIMEOUT = 2000;
 
 module.exports = class MongoConnection {
@@ -20,8 +20,8 @@ module.exports = class MongoConnection {
      * @type {MongoClient}
      */
     this.client = new MongoClient(this.connectionString, {
-      user: Config.getConfig('database.user'),
-      password: Config.getConfig('database.password'),
+      user:            Config.getConfig('database.user'),
+      password:        Config.getConfig('database.password'),
       useNewUrlParser: true,
     });
   }
@@ -48,7 +48,7 @@ module.exports = class MongoConnection {
    */
   ensureConnection() {
     return new Promise((resolve, reject) => Async.retry(
-      {times: RETRIES, interval: RETRY_TIMEOUT},
+      { times: RETRIES, interval: RETRY_TIMEOUT },
       cb => this.client.connect().then(
         connection => cb(null, connection),
         err => {
