@@ -1,0 +1,15 @@
+anonymous:
+  permissions:
+    - health
+guest:
+  permissions:
+    - device_list
+    - device_read
+  inherits:
+    - anonymous
+admin:
+  permissions:
+    - device_write
+    - device_remove
+  inherits:
+    - guest

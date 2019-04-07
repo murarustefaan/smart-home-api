@@ -3,6 +3,7 @@ const cookieParser    = require('cookie-parser');
 const async           = require('async');
 const Config          = require('./controllers/config');
 const MongoConnection = require('./controllers/data');
+const AclController   = require('./controllers/acl');
 const log             = require('debug')('app:index');
 
 const app = express();
@@ -57,9 +58,10 @@ function initDependencies() {
         const client                = new MongoConnection(Config.getDatabaseConnectionString());
         const connectedSuccessfully = await client.connect();
         return connectedSuccessfully ? client : null;
-      }
+      },
     }, (error, results) => {
       if (error) {
+        log(`an error occured: ${error}`);
         log('exiting process');
         return resolve(null);
       }
