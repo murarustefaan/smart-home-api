@@ -5,9 +5,6 @@ const Config          = require('./controllers/config');
 const MongoConnection = require('./controllers/data');
 const log             = require('debug')('app:index');
 
-const indexRouter     = require('./routes/index');
-const usersRouter     = require('./routes/users');
-
 const app = express();
 
 /**
@@ -18,27 +15,35 @@ const app = express();
   const apiPort = Config.getConfig('api.port');
 
   app.use(express.json());
-  app.use(express.urlencoded({extended: false}));
+  app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
 
 
-  // todo: maybe set them on some context
   const dependencies = await initDependencies();
-
   if (!dependencies) {
     return process.exit(1);
   }
 
+  // use app locals to share dependencies with route handlers
+  app.locals = {
+    ...app.locals,
+    ...dependencies,
+  };
 
-  app.use('/', indexRouter);
-  app.use('/users', usersRouter);
+
+  app.use('/', require('./routes/index'));
+  app.use('/users', require('./routes/users'));
+  app.use('/health', require('./routes/health'));
 
 
   app.listen(
     apiPort,
     (err) => {
-      if (err) { log(`error starting the server: ${err}`); }
-      else { log(`api started on port ${apiPort}`); }
+      if (err) {
+        log(`error starting the server: ${err}`);
+      } else {
+        log(`api started on port ${apiPort}`);
+      }
     }
   );
 
@@ -49,7 +54,7 @@ function initDependencies() {
     async.auto({
       // initialize database connections
       database: async () => {
-        const client = new MongoConnection(Config.getDatabaseConnectionString());
+        const client                = new MongoConnection(Config.getDatabaseConnectionString());
         const connectedSuccessfully = await client.connect();
         return connectedSuccessfully ? client : null;
       }
