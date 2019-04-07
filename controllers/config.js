@@ -44,10 +44,10 @@ class Config {
     const db   = this.getConfig('database.name');
 
     return 'mongodb://'
-      // + user
-      // + ':'
-      // + pass
-      // + '@'
+      + user
+      + ':'
+      + pass
+      + '@'
       + host
       + (port ? `:${port}` : port)
       + '/'

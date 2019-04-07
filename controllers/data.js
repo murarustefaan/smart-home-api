@@ -19,11 +19,7 @@ module.exports = class MongoConnection {
      * @private
      * @type {MongoClient}
      */
-    this.client = new MongoClient(this.connectionString, {
-      user:            Config.getConfig('database.user'),
-      password:        Config.getConfig('database.password'),
-      useNewUrlParser: true,
-    });
+    this.client = new MongoClient(this.connectionString);
   }
 
   /**

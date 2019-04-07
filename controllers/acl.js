@@ -41,7 +41,7 @@ class AclController {
     return (req, res, next) => {
       const userRole      = _.get(req.context, 'user.role', 'anonymous');
       const isRoleAllowed = _.includes(
-        _.get(this.roles, [userRole, 'permissions']),
+        _.get(this.roles, [ userRole, 'permissions' ]),
         permission,
       );
 
@@ -50,8 +50,8 @@ class AclController {
       }
 
       return res
-      .status(401)
-      .json({ message: 'not authorized', status: 401 });
+        .status(401)
+        .json({ message: 'not authorized', status: 401 });
     }
   }
 
