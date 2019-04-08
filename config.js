@@ -13,4 +13,8 @@ module.exports = {
     version: require('./package').version || 'N/A',
   },
 
+  auth: {
+    secret: process.env.AUTH_SECRET,
+  }
+
 };

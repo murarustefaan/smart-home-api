@@ -4,6 +4,7 @@ const bcrypt    = require("bcrypt");
 const promisify = require('util').promisify;
 const _         = require('lodash');
 const log       = require('debug')('app:controllers:auth');
+const Auth      = require('../controllers/auth');
 
 const hash    = promisify(bcrypt.hash);
 const compare = promisify(bcrypt.compare);
@@ -82,13 +83,15 @@ const save = async (req, res, next) => {
   const { username, password, roles } = req.context;
 
   const db = req.app.locals.database.SmartHome;
+  const user = {
+    email:     username,
+    password:  password,
+    roles:     roles,
+    createdAt: Date.now(),
+  };
+
   try {
-    await db.collection('users').insertOne({
-      email:     username,
-      password:  password,
-      roles:     roles,
-      createdAt: Date.now(),
-    });
+    await db.collection('users').insertOne(user);
   } catch (e) {
     log(e);
     return res
@@ -96,6 +99,7 @@ const save = async (req, res, next) => {
       .json({ message: 'could not create user, please try again later', status: 400 });
   }
 
+  req.context = { user };
   return next();
 };
 
@@ -154,10 +158,24 @@ const comparePasswords = async (req, res, next) => {
       .json({ message: 'something went wrong, please try again later', status: 401 });
   }
 
+  req.context = { user: dbUser };
+  delete req.context.user.password;
+  delete req.context.user._id;
+  return next();
+};
+
+
+/**
+ * Generate the authentication token
+ */
+const generateToken = async (req, res, next) => {
+  const user = _.pick(req.context.user, [ 'username', 'roles' ]);
+
+  const token = await Auth.sign(user);
+
   req.context = {
-    ...dbUser,
-    password: undefined,
-    _id:      undefined,
+    user,
+    token,
   };
   return next();
 };
@@ -169,9 +187,10 @@ Router.post(
   ensureUnique,
   createUserObject,
   save,
+  generateToken,
   (req, res) => {
-    log(`signup flow for user ${req.context.username} completed successfully`);
-    return res.json({ status: 200 });
+    log(`signup flow for user ${req.context.user.username} completed successfully`);
+    return res.json({ status: 200, token: req.context.token });
   }
 );
 
@@ -180,9 +199,10 @@ Router.post(
   validate,
   checkExists,
   comparePasswords,
+  generateToken,
   (req, res) => {
-    log(`login flow for user ${req.context.username} completed successfully`);
-    return res.json({ status: 200 });
+    log(`login flow for user ${req.context.user.username} completed successfully`);
+    return res.json({ status: 200, token: req.context.token });
   }
 );
 
