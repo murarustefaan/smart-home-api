@@ -4,7 +4,9 @@ const async           = require('async');
 const Config          = require('./controllers/config');
 const MongoConnection = require('./controllers/data');
 const AclController   = require('./controllers/acl');
+const Validator       = require('./controllers/validation');
 const log             = require('debug')('app:index');
+
 
 const app = express();
 
@@ -31,7 +33,11 @@ const app = express();
     ...dependencies,
   };
 
-
+  // create a context on the request
+  app.use((req, res, next) => {
+    req.context = {};
+    next();
+  });
   app.use('/health', require('./routes/health'));
   app.use('/auth', require('./routes/auth'));
 
@@ -53,11 +59,12 @@ function initDependencies() {
   return new Promise((resolve, _reject) => {
     async.auto({
       // initialize database connections
-      database: async () => {
+      database:  async () => {
         const client                = new MongoConnection(Config.getDatabaseConnectionString());
         const connectedSuccessfully = await client.connect();
         return connectedSuccessfully ? client : null;
       },
+      validator: async () => new Validator().init()
     }, (error, results) => {
       if (error) {
         log(`an error occured: ${error}`);

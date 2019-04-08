@@ -9,36 +9,35 @@ const Auth      = require('../controllers/auth');
 const hash    = promisify(bcrypt.hash);
 const compare = promisify(bcrypt.compare);
 
+
 /**
- * Ensure credentials are valid
+ * Ensure signup credentials are valid
  */
-const validate = (req, res, next) => {
-  const username = _.get(req, 'body.email');
-  const password = _.get(req, 'body.password');
-  if (!username || !password) {
+const validateSignup = async (req, res, next) => {
+  const validator = req.app.locals.validator;
+  const [valid, errors ]    = await validator.validate('auth_signup', req.body);
+
+  if (!valid) {
+    log(valid, errors);
     return res.status(400)
-              .json({ message: 'invalid or missing email or password' });
+              .json({ status: 400, message: 'invalid or missing fields' });
   }
 
-  if (username.length < 4 || username.length > 30 || password.length < 4) {
-    return res.status(400)
-              .json({ message: 'invalid email or password' });
-  }
-
-  req.context = { username, password };
+  req.context.user = { ...req.body };
   return next();
 };
+
 
 /**
  * Ensure user is unique in the database
  */
-const ensureUnique = async (req, res, next) => {
-  const { username, password } = req.context;
+const validateUnique = async (req, res, next) => {
+  const { username } = req.context.user;
 
   try {
     const db   = req.app.locals.database.SmartHome;
     const user = await db.collection('users')
-                         .findOne({ email: username });
+                         .findOne({ username });
 
     if (user) {
       log(`user ${username} already exists`);
@@ -56,70 +55,81 @@ const ensureUnique = async (req, res, next) => {
   return next();
 };
 
+
 /**
  * Create the user object, hash password
  */
 const createUserObject = async (req, res, next) => {
-  const { username, password } = req.context;
+  const user = req.context.user;
 
-  let hashedPassword = null;
   try {
-    hashedPassword = await hash(password, 10);
+    user.password = await hash(user.password, 10);
   } catch (e) {
     log(e);
     return res
       .status(400)
-      .json({ message: 'invalid email or password', status: 401 });
+      .json({ message: 'something went wrong, please try again later', status: 400 });
   }
 
-  req.context = { username, password: hashedPassword, roles: [ 'admin' ] };
+  user.roles = [ 'admin' ];
   return next();
 };
+
 
 /**
  * Save the user in the database
  */
-const save = async (req, res, next) => {
-  const { username, password, roles } = req.context;
+const saveNewUser = async (req, res, next) => {
+  const user     = req.context.user;
+  user.createdAt = Date.now();
 
   const db = req.app.locals.database.SmartHome;
-  const user = {
-    email:     username,
-    password:  password,
-    roles:     roles,
-    createdAt: Date.now(),
-  };
-
   try {
     await db.collection('users').insertOne(user);
   } catch (e) {
     log(e);
     return res
       .status(400)
-      .json({ message: 'could not create user, please try again later', status: 400 });
+      .json({ message: 'something went wrong, please try again later', status: 400 });
   }
 
-  req.context = { user };
+  req.context.user = _.omit(user, [ 'password', '_id', '__version' ]);
   return next();
 };
+
+
+const validateLogin = async (req, res, next) => {
+  const validator         = req.app.locals.validator;
+  const [ valid, errors ] = await validator.validate('auth_login', req.body);
+
+  if (!valid) {
+    log(valid, errors);
+    return res.status(401)
+              .json({ status: 401, message: 'wrong username or password' });
+  }
+
+  req.context.user = { ...req.body };
+  return next();
+};
+
 
 /**
  * Check if user exists in the database
  */
 const checkExists = async (req, res, next) => {
-  const { username, password } = req.context;
-  let user                     = null;
+  const { username } = req.context.user;
+  let user           = null;
 
   try {
     const db = req.app.locals.database.SmartHome;
     user     = await db.collection('users')
-                       .findOne({ email: username });
+                       .findOne({ username }, { _id: 0 });
 
     if (!user) {
       log(`user ${username} does not exist`);
       return res
-        .status(400)
-        .json({ message: 'wrong email or password', status: 401 });
+        .status(401)
+        .json({ message: 'wrong username or password', status: 401 });
     }
   } catch (e) {
     log(e);
@@ -128,24 +138,20 @@ const checkExists = async (req, res, next) => {
       .json({ message: 'something went wrong, please try again later', status: 401 });
   }
 
-  req.context = {
-    dbUser:  user,
-    reqUser: {
-      username,
-      password,
-    }
-  };
+  req.context.databaseUser = user;
   return next();
 };
+
 
 /**
  * Compare password from request with the one saved in the DB
  */
 const comparePasswords = async (req, res, next) => {
-  const { reqUser, dbUser } = req.context;
+  const actualPassword  = req.context.databaseUser.password;
+  const checkedPassword = req.context.user.password;
 
   try {
-    const match = await compare(reqUser.password, dbUser.password);
+    const match = await compare(checkedPassword, actualPassword);
     if (!match) {
       return res
         .status(401)
@@ -158,9 +164,8 @@ const comparePasswords = async (req, res, next) => {
       .json({ message: 'something went wrong, please try again later', status: 401 });
   }
 
-  req.context = { user: dbUser };
-  delete req.context.user.password;
-  delete req.context.user._id;
+  req.context.user = _.omit({ ...req.context.databaseUser }, [ 'password' ]);
+  delete req.context.databaseUser;
   return next();
 };
 
@@ -169,34 +174,32 @@ const comparePasswords = async (req, res, next) => {
  * Generate the authentication token
  */
 const generateToken = async (req, res, next) => {
-  const user = _.pick(req.context.user, [ 'username', 'roles' ]);
+  const token = await Auth.sign(req.context.user);
+  if (!token) {
+    log('token generation error');
+  }
 
-  const token = await Auth.sign(user);
-
-  req.context = {
-    user,
-    token,
-  };
+  req.context.token = token;
   return next();
 };
 
 
 Router.post(
   '/signup',
-  validate,
-  ensureUnique,
+  validateSignup,
+  validateUnique,
   createUserObject,
-  save,
+  saveNewUser,
   generateToken,
   (req, res) => {
     log(`signup flow for user ${req.context.user.username} completed successfully`);
-    return res.json({ status: 200, token: req.context.token });
+    return res.json({ status: 200, token: req.context.token, user: req.context.user });
   }
 );
 
 Router.post(
   '/login',
-  validate,
+  validateLogin,
   checkExists,
   comparePasswords,
   generateToken,
