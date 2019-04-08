@@ -14,8 +14,8 @@ const compare = promisify(bcrypt.compare);
  * Ensure signup credentials are valid
  */
 const validateSignup = async (req, res, next) => {
-  const validator = req.app.locals.validator;
-  const [valid, errors ]    = await validator.validate('auth_signup', req.body);
+  const validator         = req.app.locals.validator;
+  const [ valid, errors ] = await validator.validate('auth_signup', req.body);
 
   if (!valid) {
     log(valid, errors);

@@ -19,7 +19,7 @@ module.exports = class MongoConnection {
      * @private
      * @type {MongoClient}
      */
-    this.client = new MongoClient(this.connectionString);
+    this.client = new MongoClient(this.connectionString, { useNewUrlParser: true });
   }
 
   /**

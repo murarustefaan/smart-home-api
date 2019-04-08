@@ -25,17 +25,6 @@ class Config {
   }
 
 
-  /**
-   * Set a config value.
-   *
-   * @param {string} configName
-   * @param {any} configValue
-   */
-  setConfig(configName, configValue) {
-    _.set(this._configs, configName, configValue);
-  }
-
-
   getDatabaseConnectionString() {
     const host = this.getConfig('database.host');
     const port = this.getConfig('database.port');
@@ -43,15 +32,7 @@ class Config {
     const pass = this.getConfig('database.password');
     const db   = this.getConfig('database.name');
 
-    return 'mongodb://'
-      + user
-      + ':'
-      + pass
-      + '@'
-      + host
-      + (port ? `:${port}` : port)
-      + '/'
-      + db;
+    return `mongodb://${user}:${pass}@${host}${port ? ':' + port : port}/${db}`;
   }
 
 }

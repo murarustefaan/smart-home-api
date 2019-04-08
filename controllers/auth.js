@@ -49,8 +49,7 @@ class AuthController {
         token,
         this.secret,
       );
-    }
-    catch (e) {
+    } catch (e) {
       log(e);
     }
 
