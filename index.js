@@ -4,6 +4,7 @@ const async           = require('async');
 const Config          = require('./controllers/config');
 const MongoConnection = require('./controllers/data');
 const AclController   = require('./controllers/acl');
+const AuthController  = require('./controllers/auth');
 const Validator       = require('./controllers/validation');
 const log             = require('debug')('app:index');
 
@@ -34,12 +35,10 @@ const app = express();
   };
 
   // create a context on the request
-  app.use((req, res, next) => {
-    req.context = {};
-    next();
-  });
+  app.use(AuthController.createContext.bind(AuthController));
   app.use('/health', require('./routes/health'));
   app.use('/auth', require('./routes/auth'));
+  app.use('/devices', require('./routes/devices'));
 
 
   app.listen(

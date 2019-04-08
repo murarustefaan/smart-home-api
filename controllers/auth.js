@@ -56,6 +56,28 @@ class AuthController {
     return data;
   }
 
+
+  /**
+   * Middleware function that will be used in every api route to provide user context
+   */
+  async createContext(req, res, next) {
+    req.context = {};
+
+    const authorizationHeader = req.header('Authorization');
+    if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+      return next();
+    }
+
+    const token = authorizationHeader.split(' ')[1];
+    const decodedToken = await this.verify(token);
+    if (!decodedToken) {
+      return next();
+    }
+
+    req.context.user = decodedToken;
+    next();
+  }
+
 }
 
 

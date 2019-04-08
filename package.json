@@ -1,6 +1,6 @@
 {
   "name": "smart-home-api",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "private": true,
   "author": "Ștefan MURARU <muraru.stefaan@gmail.com>",
   "license": "ISC",
@@ -14,6 +14,7 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.11",
     "mongodb": "^3.2.2",
+    "node-fetch": "^2.3.0",
     "yaml": "^1.5.0"
   },
   "devDependencies": {

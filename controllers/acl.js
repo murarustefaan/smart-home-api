@@ -39,9 +39,10 @@ class AclController {
 
   isAllowed(permission) {
     return (req, res, next) => {
-      const userRole      = _.get(req.context, 'user.role', 'anonymous');
+      const userRoles     = _.get(req.context, 'user.roles', 'anonymous');
+      const permissions   = _.reduce(userRoles, (acc, role) => ([ ...acc, ..._.get(this.roles, [ role, 'permissions' ]) ]), []);
       const isRoleAllowed = _.includes(
-        _.get(this.roles, [ userRole, 'permissions' ]),
+        permissions,
         permission,
       );
 
