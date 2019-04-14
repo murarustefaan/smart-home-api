@@ -1,6 +1,7 @@
 const express         = require('express');
 const cookieParser    = require('cookie-parser');
 const async           = require('async');
+const cors            = require('cors');
 const Config          = require('./controllers/config');
 const MongoConnection = require('./controllers/data');
 const AclController   = require('./controllers/acl');
@@ -21,7 +22,11 @@ const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
-
+  app.use(cors({
+    origin: 'http://192.168.43.222:4200',
+    optionsSuccessStatus: 200,
+    credentials: true,
+  }));
 
   const dependencies = await initDependencies();
   if (!dependencies) {

@@ -128,7 +128,7 @@ const checkExists = async (req, res, next) => {
   try {
     const db = req.app.locals.database.SmartHome;
     user     = await db.collection('users')
-                       .findOne({ username }, { _id: 0 });
+                       .findOne({ username });
 
     if (!user) {
       log(`user ${username} does not exist`);
@@ -179,7 +179,7 @@ const comparePasswords = async (req, res, next) => {
  * Generate the authentication token
  */
 const generateToken = async (req, res, next) => {
-  const token = await Auth.sign(req.context.user);
+  const token = await Auth.sign({ user: req.context.user });
   if (!token) {
     log('token generation error');
   }
