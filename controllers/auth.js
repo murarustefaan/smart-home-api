@@ -2,6 +2,7 @@ const jwt       = require('jsonwebtoken');
 const promisify = require('util').promisify;
 const log       = require('debug')('app:controllers:auth');
 const Config    = require('./config');
+const fs        = require('fs');
 
 const jwtSign   = promisify(jwt.sign).bind(jwt);
 const jwtVerify = promisify(jwt.verify).bind(jwt);
@@ -10,7 +11,10 @@ const jwtVerify = promisify(jwt.verify).bind(jwt);
 class AuthController {
 
   constructor() {
-    this.secret = Config.getConfig('auth.secret');
+    this.certificatesPath = Config.getConfig('auth.certificatesPath');
+    this.keyPassword      = Config.getConfig('auth.keyPassword');
+    this.privateKey       = fs.readFileSync(`${this.certificatesPath}/key_private.key`);
+    this.publicKey        = fs.readFileSync(`${this.certificatesPath}/key_public.key`);
   }
 
   /**
@@ -23,9 +27,9 @@ class AuthController {
 
     try {
       token = await jwtSign(
-        { userId: user._id, roles: user.roles, createdAt: user.createdAt},
-        this.secret,
-        { algorithm: 'HS512', expiresIn: '2d' },
+        { userId: user._id, roles: user.roles, createdAt: user.createdAt },
+        { key: this.privateKey, passphrase: this.keyPassword },
+        { algorithm: 'RS512', expiresIn: '2d' },
       );
 
     } catch (e) {
@@ -47,7 +51,7 @@ class AuthController {
     try {
       data = await jwtVerify(
         token,
-        this.secret,
+        this.publicKey,
       );
     } catch (e) {
       log(e);
@@ -68,7 +72,7 @@ class AuthController {
       return next();
     }
 
-    const token = authorizationHeader.split(' ')[1];
+    const token        = authorizationHeader.split(' ')[1];
     const decodedToken = await this.verify(token);
     if (!decodedToken) {
       return next();

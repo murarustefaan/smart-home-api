@@ -1,7 +1,7 @@
 module.exports = {
 
   dataApis: {
-    common: {
+    common:  {
       host: process.env.COMMON_API_HOST
     },
     devices: {
@@ -16,7 +16,9 @@ module.exports = {
   },
 
   auth: {
-    secret: process.env.AUTH_SECRET,
+    secret:           process.env.AUTH_SECRET,
+    certificatesPath: process.env.CERTIFICATES_PATH,
+    keyPassword:      process.env.KEY_PASSWORD,
   }
 
 };
