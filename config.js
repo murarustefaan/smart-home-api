@@ -4,6 +4,9 @@ module.exports = {
     common: {
       host: process.env.COMMON_API_HOST
     },
+    devices: {
+      host: process.env.DEVICES_API_HOST
+    }
   },
 
   api: {

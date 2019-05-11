@@ -1,6 +1,7 @@
-const yaml = require('yaml');
-const fs   = require('fs');
-const _    = require('lodash');
+const yaml        = require('yaml');
+const fs          = require('fs');
+const _           = require('lodash');
+const StatusCodes = require('http-status-codes');
 
 class AclController {
 
@@ -39,7 +40,7 @@ class AclController {
 
   isAllowed(permission) {
     return (req, res, next) => {
-      const userRoles     = _.get(req.context, 'user.roles', 'anonymous');
+      const userRoles     = _.get(req.context, 'user.roles', [ 'anonymous' ]);
       const permissions   = _.reduce(userRoles, (acc, role) => ([ ...acc, ..._.get(this.roles, [ role, 'permissions' ]) ]), []);
       const isRoleAllowed = _.includes(
         permissions,
@@ -51,8 +52,8 @@ class AclController {
       }
 
       return res
-        .status(401)
-        .json({ message: 'not authorized', status: 401 });
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: 'not authorized', status: StatusCodes.UNAUTHORIZED });
     }
   }
 

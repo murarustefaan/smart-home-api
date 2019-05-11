@@ -42,6 +42,7 @@ const app = express();
   app.use(AuthController.createContext.bind(AuthController));
   app.use('/health', require('./routes/health'));
   app.use('/auth', require('./routes/auth'));
+  app.use('/devices', require('./routes/devices'));
 
 
   app.listen(

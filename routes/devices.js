@@ -1,15 +1,16 @@
-const Express = require('express');
-const Router  = Express.Router();
-const Acl     = require('../controllers/acl');
-const Data    = require('../data/devices');
+const Express     = require('express');
+const Router      = Express.Router();
+const StatusCodes = require('http-status-codes');
+const _           = require('lodash');
+const Acl         = require('../controllers/acl');
+const Data        = require('../data/devices');
 
 
 /**
  * Get a list with all devices
- * TODO: Maybe request these from the `devices api`?
  */
 const getDevices = async (req, res, next) => {
-  const devices       = await Data.getDevices(req.app.locals.database);
+  const devices       = await Data.getDevices();
   req.context.devices = devices || [];
   return next();
 };
@@ -40,10 +41,18 @@ Router.get(
   '/:deviceId',
   Acl.isAllowed('device_read'),
   getDeviceDetails,
-  (req, res) => res.json({
-    status:  200,
-    device: req.context.device
-  }),
+  (req, res) => {
+    const device   = _.get(req, 'context.device');
+    const response = { status: device ? StatusCodes.OK : StatusCodes.NOT_FOUND };
+
+    if (_.get(device, '_id')) {
+      response.device = device;
+    } else {
+      response.message = 'device not found';
+    }
+
+    return res.json(response);
+  },
 );
 
 
