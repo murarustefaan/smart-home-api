@@ -3,7 +3,6 @@ const cookieParser    = require('cookie-parser');
 const async           = require('async');
 const cors            = require('cors');
 const Config          = require('./controllers/config');
-const MongoConnection = require('./controllers/data');
 const AclController   = require('./controllers/acl');
 const AuthController  = require('./controllers/auth');
 const Validator       = require('./controllers/validation');
@@ -43,7 +42,6 @@ const app = express();
   app.use(AuthController.createContext.bind(AuthController));
   app.use('/health', require('./routes/health'));
   app.use('/auth', require('./routes/auth'));
-  app.use('/devices', require('./routes/devices'));
 
 
   app.listen(
@@ -62,12 +60,6 @@ const app = express();
 function initDependencies() {
   return new Promise((resolve, _reject) => {
     async.auto({
-      // initialize database connections
-      database:  async () => {
-        const client                = new MongoConnection(Config.getDatabaseConnectionString());
-        const connectedSuccessfully = await client.connect();
-        return connectedSuccessfully ? client : null;
-      },
       validator: async () => new Validator().init()
     }, (error, results) => {
       if (error) {

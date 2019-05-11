@@ -12,9 +12,9 @@
     "cors": "^2.8.5",
     "debug": "^2.6.9",
     "express": "~4.16.0",
+    "http-status-codes": "^1.3.2",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.11",
-    "mongodb": "^3.2.2",
     "node-fetch": "^2.3.0",
     "yaml": "^1.5.0"
   },

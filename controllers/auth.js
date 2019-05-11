@@ -15,15 +15,15 @@ class AuthController {
 
   /**
    * Try sign a token with the secret from an environment variable.
-   * @param {any} data
+   * @param {Object} user
    * @returns {string|null}
    */
-  async sign(data) {
+  async sign(user) {
     let token = null;
 
     try {
       token = await jwtSign(
-        data,
+        { userId: user._id, roles: user.roles, createdAt: user.createdAt},
         this.secret,
         { algorithm: 'HS512', expiresIn: '2d' },
       );
