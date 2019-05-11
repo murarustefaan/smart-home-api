@@ -9,7 +9,7 @@ const bcrypt      = require("bcrypt");
 const promisify   = require('util').promisify;
 const _           = require('lodash');
 const StatusCodes = require('http-status-codes');
-const log         = require('debug')('app:controllers:auth');
+const log         = require('debug')('app:routes:auth');
 const Auth        = require('../controllers/auth');
 const UsersApi    = require('../data/users');
 
@@ -25,7 +25,7 @@ const validateSignup = async (req, res, next) => {
   const [ valid, errors ] = await validator.validate('auth_signup', req.body);
 
   if (!valid) {
-    log(valid, errors);
+    log(`invalid signup request, ${errors.map(e => _.get(e, 'message')).join(', ')}`);
     return res.status(400)
               .json({ status: 400, message: 'invalid or missing fields' });
   }
