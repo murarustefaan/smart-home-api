@@ -3,6 +3,7 @@ const promisify = require('util').promisify;
 const log       = require('debug')('app:controllers:auth');
 const Config    = require('./config');
 const fs        = require('fs');
+const _         = require('lodash');
 
 const jwtSign   = promisify(jwt.sign).bind(jwt);
 const jwtVerify = promisify(jwt.verify).bind(jwt);
@@ -54,7 +55,7 @@ class AuthController {
         this.publicKey,
       );
     } catch (e) {
-      log(e);
+      log(`token verification error, ${_.get(e, 'message')}`);
     }
 
     return data;
@@ -74,6 +75,7 @@ class AuthController {
 
     const token        = authorizationHeader.split(' ')[1];
     const decodedToken = await this.verify(token);
+
     if (!decodedToken) {
       return next();
     }
