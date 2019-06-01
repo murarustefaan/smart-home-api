@@ -11,8 +11,7 @@ Router.get(
   '/',
   Acl.isAllowed('health'),
   (req, res) => res.json({
-    api:      'ok',
-    database: req.app.locals.database ? Status.OK : Status.ERROR,
+    api: Status.OK,
   })
 );
 

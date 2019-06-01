@@ -31,7 +31,7 @@ Router.get(
   Acl.isAllowed('device_list'),
   getDevices,
   (req, res) => res.json({
-    status:  200,
+    status:  StatusCodes.OK,
     devices: req.context.devices
   }),
 );
@@ -48,10 +48,13 @@ Router.get(
     if (_.get(device, '_id')) {
       response.device = device;
     } else {
+      response.status = StatusCodes.NOT_FOUND;
       response.message = 'device not found';
     }
 
-    return res.json(response);
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json(response);
   },
 );
 

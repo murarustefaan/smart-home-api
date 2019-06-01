@@ -11,5 +11,7 @@ admin:
   permissions:
     - device_write
     - device_remove
+    - user_details
+    - user_list
   inherits:
     - guest

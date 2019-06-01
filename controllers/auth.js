@@ -28,7 +28,7 @@ class AuthController {
 
     try {
       token = await jwtSign(
-        { userId: user._id, roles: user.roles, createdAt: user.createdAt },
+        { user: { userId: user._id, roles: user.roles, createdAt: user.createdAt }},
         { key: this.privateKey, passphrase: this.keyPassword },
         { algorithm: 'RS512', expiresIn: '2d' },
       );
@@ -80,7 +80,10 @@ class AuthController {
       return next();
     }
 
-    req.context.user = decodedToken;
+    req.context = {
+      ...req.context,
+      ...decodedToken,
+    };
     next();
   }
 
