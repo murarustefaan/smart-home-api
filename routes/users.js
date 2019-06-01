@@ -8,7 +8,7 @@ const Data        = require('../data/users');
 
 const isAllowed = async (req, res, next) => {
   const requestedUserId = _.get(req, 'params.userId');
-  const userId = _.get(req, 'context.user.userId');
+  const userId          = _.get(req, 'context.user.userId');
 
   if (userId === requestedUserId) {
     return next();
@@ -16,10 +16,10 @@ const isAllowed = async (req, res, next) => {
 
   if (!Acl.isAllowed('user_details')) {
     return res.status(StatusCodes.UNAUTHORIZED)
-      .json({
-        status: StatusCodes.UNAUTHORIZED,
-        message: 'not authorized'
-      });
+              .json({
+                status:  StatusCodes.UNAUTHORIZED,
+                message: 'not authorized'
+              });
   }
 
   return next();
@@ -30,8 +30,10 @@ const isAllowed = async (req, res, next) => {
  * Get detailed info for a specific device and it's current state from the device api.
  */
 const getUserInfo = async (req, res, next) => {
-  const user       = await Data.getUser(req.params.userId);
-  req.context.user = user || {};
+  const user = await Data.getUser(req.params.userId);
+
+  req.context.user = _.omit(user, [ 'password' ]) || {};
+
   return next();
 };
 
@@ -41,7 +43,7 @@ Router.get(
   isAllowed,
   getUserInfo,
   (req, res) => {
-    const user   = _.get(req, 'context.user');
+    const user     = _.get(req, 'context.user');
     const response = { status: _.get(user, '_id') ? StatusCodes.OK : StatusCodes.NOT_FOUND };
 
     response.user = user;
