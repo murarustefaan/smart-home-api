@@ -9,7 +9,8 @@ guest:
     - anonymous
 admin:
   permissions:
-    - device_write
+    - device_update
+    - device_create
     - device_remove
     - user_details
     - user_list

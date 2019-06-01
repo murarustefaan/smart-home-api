@@ -39,6 +39,7 @@ const app = express();
   app.use('/health', require('./routes/health'));
   app.use('/auth', require('./routes/auth'));
   app.use('/devices', require('./routes/devices'));
+  app.use('/users', require('./routes/users'));
 
 
   app.listen(
