@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "chipId": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 8
+    },
+    "name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 50
+    },
+    "state": {
+      "type": "object",
+      "properties": {
+        "temperature": {
+          "type": "number"
+        },
+        "status": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
