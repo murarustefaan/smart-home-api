@@ -28,7 +28,7 @@ class AuthController {
 
     try {
       token = await jwtSign(
-        { user: { userId: user._id, roles: user.roles, createdAt: user.createdAt }},
+        { user: { userId: user._id, roles: user.roles, createdAt: user.createdAt } },
         { key: this.privateKey, passphrase: this.keyPassword },
         { algorithm: 'RS512', expiresIn: '2d' },
       );

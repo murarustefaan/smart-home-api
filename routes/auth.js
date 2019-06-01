@@ -1,8 +1,3 @@
-/**
- * TODO: Add all tokens into the database to have the ability to invalidate them.
- * TODO: Logout functionality based on invalidating tokens.
- */
-
 const Express     = require('express');
 const Router      = Express.Router();
 const bcrypt      = require("bcrypt");

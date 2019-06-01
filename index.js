@@ -1,12 +1,12 @@
-const express         = require('express');
-const cookieParser    = require('cookie-parser');
-const async           = require('async');
-const cors            = require('cors');
-const Config          = require('./controllers/config');
-const AclController   = require('./controllers/acl');
-const AuthController  = require('./controllers/auth');
-const Validator       = require('./controllers/validation');
-const log             = require('debug')('app:index');
+const express        = require('express');
+const cookieParser   = require('cookie-parser');
+const async          = require('async');
+const cors           = require('cors');
+const Config         = require('./controllers/config');
+const AclController  = require('./controllers/acl');
+const AuthController = require('./controllers/auth');
+const Validator      = require('./controllers/validation');
+const log            = require('debug')('app:index');
 
 
 const app = express();

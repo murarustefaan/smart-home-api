@@ -17,6 +17,8 @@ module.exports = class Validator {
     this.validationSchemas = {
       auth_login:  '../validation/auth/login.json',
       auth_signup: '../validation/auth/signup.json',
+      devices_patch: '../validation/devices/patch.json',
+      devices_create: '../validation/devices/patch.json',
     };
   }
 

@@ -74,6 +74,28 @@ module.exports = {
 
 
   /**
+   * Edit a existing device
+   *
+   * @param {string} id
+   * @param {Object} device
+   * @returns {Promise<{}>}
+   */
+  editDevice: async (id, device) => {
+    try {
+      const response = await fetch(`${config.dataApis.devices.host}/devices/${id}`, {
+        method:  'PATCH',
+        body:    JSON.stringify(device),
+        headers: new fetch.Headers({ 'Content-Type': 'application/json' })
+      });
+      return response.ok;
+    } catch (e) {
+      log(e);
+      return null
+    }
+  },
+
+
+  /**
    * Remove a device from the system
    * @param {string} deviceId
    * @returns {Promise<null|boolean>}
