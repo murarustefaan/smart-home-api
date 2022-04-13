@@ -6,7 +6,7 @@
   "license": "ISC",
   "dependencies": {
     "ajv": "^6.10.0",
-    "async": "^2.6.2",
+    "async": "^3.2.2",
     "bcrypt": "^3.0.5",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.5",
